@@ -53,7 +53,7 @@
       padding: 18px 14px;
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
       color: #e4e6eb;
-      max-height: 620px; /* немного увеличили */
+      max-height: 620px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -162,7 +162,6 @@
       margin-top: 10px;
     }
 
-    /* Модальное окно */
     .modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -271,7 +270,7 @@
 
 <script type="module">
   import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, query, orderByChild, limitToLast, get } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
   import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
   const firebaseConfig = {
@@ -327,19 +326,36 @@
   document.getElementById('randomNicknameBtn').addEventListener('click', () => saveNickname(generateRandomNick()));
   input.addEventListener('keypress', (e) => { if(e.key==='Enter') saveNickname(input.value.trim()); });
 
-  // ---------- ТАБЛИЦА ЛИДЕРОВ (реальное время, топ-100) ----------
+  // ---------- ТАБЛИЦА ЛИДЕРОВ (все записи, сортировка по убыванию) ----------
   const leaderboardBody = document.getElementById('leaderboardBody');
-  const topScoresQuery = query(leaderboardRef, orderByChild('score'), limitToLast(100));
 
-  onValue(topScoresQuery, (snapshot) => {
+  // Используем onValue для получения всех записей без limitToLast, чтобы избежать проблем с сортировкой
+  onValue(leaderboardRef, (snapshot) => {
     const entries = [];
-    snapshot.forEach(child => entries.push({ key: child.key, ...child.val() }));
+    snapshot.forEach(child => {
+      const data = child.val();
+      if (data && typeof data.score === 'number') {
+        entries.push({ nickname: data.nickname || '???', score: data.score });
+      }
+    });
+    
+    // Сортируем по убыванию счёта
     entries.sort((a, b) => b.score - a.score);
+    
+    // Берём топ-100
     const top100 = entries.slice(0, 100);
+    
     let html = '';
-    top100.forEach((e, i) => html += `<div class="leaderboard-row"><span>${i+1}. ${e.nickname}</span><span>${e.score}</span></div>`);
-    if (!top100.length) html = '<div class="leaderboard-row">Пока нет рекордов</div>';
+    top100.forEach((entry, index) => {
+      html += `<div class="leaderboard-row"><span>${index+1}. ${entry.nickname}</span><span>${entry.score}</span></div>`;
+    });
+    
+    if (top100.length === 0) {
+      html = '<div class="leaderboard-row">Пока нет рекордов</div>';
+    }
+    
     leaderboardBody.innerHTML = html;
+    console.log(`📋 Таблица обновлена, записей: ${entries.length}`);
   });
 
   // ---------- ИГРА ----------
@@ -380,11 +396,9 @@
   async function submitScore() {
     if (!playerNickname) return;
     try {
-      // Ключ записи — закодированный ник (безопасный для Firebase)
       const safeKey = encodeURIComponent(playerNickname);
       const playerRef = ref(db, `leaderboard/${safeKey}`);
       
-      // Получаем текущую запись
       const snapshot = await get(playerRef);
       const currentData = snapshot.val();
       
