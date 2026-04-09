@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>🏃 LANE RUNNER · Мировой рейтинг</title>
-  <!-- Фавикон в стиле раннера (бегун + дорожки) -->
+  <title>🏃 LANE RUNNER</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23252a34'/%3E%3Cpath d='M26 24 L36 24 L34 30 L28 30 Z' fill='%23e4e6eb'/%3E%3Crect x='18' y='34' width='28' height='4' fill='%235a9cff'/%3E%3Crect x='22' y='42' width='20' height='4' fill='%23e04e5f'/%3E%3Ccircle cx='46' cy='40' r='5' fill='%23f5b042'/%3E%3C/svg%3E">
   <style>
     * {
@@ -14,7 +13,6 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-
     body {
       min-height: 100vh;
       background: #1a1e26;
@@ -24,7 +22,6 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       padding: 12px;
     }
-
     .main-wrapper {
       display: flex;
       flex-wrap: wrap;
@@ -34,7 +31,6 @@
       max-width: 1100px;
       width: 100%;
     }
-
     .game-card {
       flex: 0 1 auto;
       min-width: 300px;
@@ -45,7 +41,6 @@
       padding: 18px 18px 22px;
       box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
     }
-
     .leaderboard-panel {
       flex: 1 1 260px;
       max-width: 320px;
@@ -60,14 +55,12 @@
       display: flex;
       flex-direction: column;
     }
-
     .leaderboard-panel h2 {
       text-align: center;
       margin-bottom: 12px;
       font-weight: 500;
       color: #ffffff;
     }
-
     .leaderboard-scroll {
       overflow-y: auto;
       flex: 1;
@@ -75,14 +68,13 @@
       background: #1a1e26;
       padding: 6px 4px;
     }
-
     .leaderboard-row {
       display: flex;
       justify-content: space-between;
       padding: 8px 12px;
       border-bottom: 1px solid #3a4050;
       color: #d0d4dd;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
     }
     .leaderboard-row.header {
       font-weight: 600;
@@ -92,14 +84,20 @@
       top: 0;
       background: #1a1e26;
     }
-
+    .leaderboard-row.highlight {
+      background: #2a3a5a;
+      border-radius: 12px;
+      margin: 4px 0;
+      font-weight: 600;
+      color: #ffd966;
+    }
     .stats {
       display: flex;
       justify-content: space-between;
       margin-bottom: 12px;
       gap: 8px;
+      align-items: center;
     }
-
     .stat {
       background: #1e232c;
       padding: 8px 14px;
@@ -112,14 +110,30 @@
       gap: 6px;
       box-shadow: inset 0 1px 2px #00000030;
     }
-
     .stat span {
       color: #ffffff;
       font-weight: 600;
       min-width: 2rem;
       text-align: right;
     }
-
+    .nickname-edit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .edit-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 4px;
+      color: #a8b1c4;
+      transition: 0.1s;
+    }
+    .edit-btn:active {
+      transform: scale(0.9);
+      color: #ffffff;
+    }
     canvas {
       display: block;
       width: 100%;
@@ -129,45 +143,42 @@
       box-shadow: inset 0 0 0 1px #3e4555, 0 6px 12px rgba(0,0,0,0.3);
       touch-action: none;
       cursor: pointer;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
-
     .action-area {
       display: flex;
       justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
     }
-
     .btn {
       background: #3a4458;
       border: none;
       color: #ffffff;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 500;
-      padding: 12px 28px;
+      padding: 10px 22px;
       border-radius: 60px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       cursor: pointer;
-      transition: 0.15s;
+      transition: 0.1s;
       letter-spacing: 0.3px;
     }
-
     .btn:active {
       background: #4e5a72;
       transform: scale(0.97);
     }
-
     .hint {
       color: #a8b1c4;
       text-align: center;
       font-weight: 400;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       margin-top: 10px;
     }
-
     .modal {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0,0,0,0.7);
       backdrop-filter: blur(4px);
       display: flex;
       justify-content: center;
@@ -188,10 +199,6 @@
       color: #ffffff;
       text-align: center;
     }
-    .modal-content h2 {
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
     .modal-content input {
       width: 100%;
       padding: 14px 18px;
@@ -208,13 +215,12 @@
       border: none;
       color: white;
       font-weight: 500;
-      padding: 12px 28px;
+      padding: 10px 24px;
       border-radius: 60px;
-      font-size: 1rem;
+      font-size: 0.9rem;
       cursor: pointer;
       margin: 5px;
     }
-
     @media (max-width: 700px) {
       .main-wrapper {
         flex-direction: column;
@@ -223,16 +229,28 @@
       .leaderboard-panel {
         max-width: 100%;
         width: 100%;
-        max-height: 260px;
+        max-height: 280px;
       }
-      .game-card {
-        max-width: 100%;
-      }
+    }
+    .float-score {
+      position: absolute;
+      font-weight: bold;
+      font-size: 24px;
+      color: #ffd966;
+      text-shadow: 0 0 5px black;
+      pointer-events: none;
+      z-index: 200;
+      animation: floatUp 0.8s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0px); }
+      100% { opacity: 0; transform: translateY(-60px); }
     }
   </style>
 </head>
 <body>
 
+<!-- Модальное окно для первого ввода ника (если нет сохранённого) -->
 <div class="modal" id="nicknameModal">
   <div class="modal-content">
     <h2>🏃 Введите ваш ник</h2>
@@ -243,21 +261,37 @@
   </div>
 </div>
 
+<!-- Модальное окно для редактирования ника (вызывается по кнопке ✏️) -->
+<div class="modal" id="editNicknameModal">
+  <div class="modal-content">
+    <h2>✏️ Редактировать ник</h2>
+    <input type="text" id="editNicknameInput" maxlength="16" placeholder="Новый ник">
+    <br>
+    <button id="saveEditNicknameBtn">Сохранить</button>
+    <button id="randomEditNicknameBtn">🎲 Случайный</button>
+    <button id="cancelEditBtn">Отмена</button>
+  </div>
+</div>
+
 <div class="main-wrapper">
   <div class="game-card">
     <div class="stats">
       <div class="stat">🏆 <span id="scoreDisplay">0</span></div>
       <div class="stat">📊 <span id="bestDisplay">0</span></div>
-      <div class="stat" id="nicknameDisplay">👤 <span>---</span></div>
+      <div class="stat nickname-edit">
+        👤 <span id="nicknameDisplaySpan">---</span>
+        <button class="edit-btn" id="editNicknameBtn">✏️</button>
+      </div>
     </div>
 
     <canvas id="gameCanvas" width="400" height="500"></canvas>
 
     <div class="action-area">
       <button class="btn" id="restartBtn">▶ СТАРТ</button>
+      <button class="btn" id="soundToggleBtn">🔊 Звук вкл</button>
     </div>
     <div class="hint">
-      🚀 ПРОБЕЛ или ТАП — прыжок между линиями
+      🚀 ПРОБЕЛ / ТАП / КЛИК — прыжок между линиями
     </div>
   </div>
 
@@ -267,6 +301,7 @@
       <div class="leaderboard-row header"><span>Игрок</span><span>Счёт</span></div>
       <div id="leaderboardBody">Загрузка...</div>
     </div>
+    <div id="myRankInfo" style="margin-top: 8px; font-size: 0.8rem; text-align: center; color: #aaa;"></div>
   </div>
 </div>
 
@@ -275,6 +310,7 @@
   import { getDatabase, ref, onValue, set, get, query, orderByChild, limitToLast } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
   import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
+  // ---------- FIREBASE ----------
   const firebaseConfig = {
     apiKey: "AIzaSyDNYKNYBi0aesICjdJ07aEtd3IF3u--e4w",
     authDomain: "game-c4139.firebaseapp.com",
@@ -289,86 +325,117 @@
   const db = getDatabase(app);
   const auth = getAuth(app);
   signInAnonymously(auth).catch(e => console.warn('Auth:', e));
-
-  // ИСПРАВЛЕНО: используем отдельную ветку lane_runner_leaderboard (согласно правилам)
   const LEADERBOARD_PATH = 'lane_runner_leaderboard';
   const leaderboardRef = ref(db, LEADERBOARD_PATH);
 
-  // ---------- НИКНЕЙМ ----------
+  // ---------- НИКНЕЙМ (с поддержкой редактирования) ----------
   let playerNickname = localStorage.getItem('laneRunnerNickname');
-  const nicknameSpan = document.querySelector('#nicknameDisplay span');
-  const modal = document.getElementById('nicknameModal');
-  const input = document.getElementById('nicknameInput');
-  
+  const nicknameSpan = document.getElementById('nicknameDisplaySpan');
+  const modalFirst = document.getElementById('nicknameModal');
+  const editModal = document.getElementById('editNicknameModal');
+  const editInput = document.getElementById('editNicknameInput');
   let gameAllowed = false;
 
   function generateRandomNick() {
     const adj = ['Swift', 'Quick', 'Sharp', 'Bold', 'Calm', 'Brave', 'Fast', 'Lucky', 'Steel', 'Wild'];
     const noun = ['Fox', 'Hawk', 'Wolf', 'Lynx', 'Falcon', 'Runner', 'Dash', 'Puma', 'Tiger', 'Eagle'];
-    const a = adj[Math.floor(Math.random() * adj.length)];
-    const n = noun[Math.floor(Math.random() * noun.length)];
-    return `${a}_${n}${Math.floor(Math.random()*100)}`;
+    return `${adj[Math.floor(Math.random() * adj.length)]}_${noun[Math.floor(Math.random() * noun.length)]}${Math.floor(Math.random()*100)}`;
   }
 
-  function saveNickname(name) {
+  function applyNickname(name) {
     playerNickname = name || generateRandomNick();
     localStorage.setItem('laneRunnerNickname', playerNickname);
     nicknameSpan.textContent = playerNickname;
-    modal.classList.remove('active');
     gameAllowed = true;
+    // Если игра не активна, не перезапускаем её автоматически
+    // Но если игра была проиграна и стоит GAME OVER, пользователь сам нажмёт СТАРТ
   }
 
+  // Первоначальная установка ника
   if (!playerNickname) {
-    modal.classList.add('active');
+    modalFirst.classList.add('active');
     gameAllowed = false;
   } else {
     nicknameSpan.textContent = playerNickname;
     gameAllowed = true;
   }
 
-  document.getElementById('saveNicknameBtn').addEventListener('click', () => saveNickname(input.value.trim()));
-  document.getElementById('randomNicknameBtn').addEventListener('click', () => saveNickname(generateRandomNick()));
-  input.addEventListener('keypress', (e) => { if(e.key==='Enter') saveNickname(input.value.trim()); });
+  // Обработка первого модального окна
+  document.getElementById('saveNicknameBtn').addEventListener('click', () => {
+    const newName = document.getElementById('nicknameInput').value.trim();
+    if (newName) applyNickname(newName);
+    else applyNickname(generateRandomNick());
+    modalFirst.classList.remove('active');
+  });
+  document.getElementById('randomNicknameBtn').addEventListener('click', () => {
+    applyNickname(generateRandomNick());
+    modalFirst.classList.remove('active');
+  });
 
-  // ---------- ТАБЛИЦА ЛИДЕРОВ (сортировка по score, топ-100) ----------
+  // Редактирование ника через кнопку ✏️
+  document.getElementById('editNicknameBtn').addEventListener('click', () => {
+    if (!gameAllowed) return;
+    editInput.value = playerNickname;
+    editModal.classList.add('active');
+  });
+  document.getElementById('saveEditNicknameBtn').addEventListener('click', () => {
+    const newName = editInput.value.trim();
+    if (newName) applyNickname(newName);
+    else applyNickname(generateRandomNick());
+    editModal.classList.remove('active');
+    // Обновляем подсветку в лидерборде (перерисовка произойдёт сама, так как leaderboardData перезагрузится)
+  });
+  document.getElementById('randomEditNicknameBtn').addEventListener('click', () => {
+    const randomName = generateRandomNick();
+    applyNickname(randomName);
+    editModal.classList.remove('active');
+  });
+  document.getElementById('cancelEditBtn').addEventListener('click', () => {
+    editModal.classList.remove('active');
+  });
+  // Закрытие по Enter в поле редактирования
+  editInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const newName = editInput.value.trim();
+      if (newName) applyNickname(newName);
+      else applyNickname(generateRandomNick());
+      editModal.classList.remove('active');
+    }
+  });
+
+  // ---------- ТАБЛИЦА ЛИДЕРОВ ----------
   const leaderboardBody = document.getElementById('leaderboardBody');
-  
-  // Оптимизированный запрос с использованием индекса score (согласно правилам)
+  const myRankInfo = document.getElementById('myRankInfo');
   const topScoresQuery = query(leaderboardRef, orderByChild('score'), limitToLast(100));
+  let leaderboardData = [];
 
   onValue(topScoresQuery, (snapshot) => {
     const entries = [];
     snapshot.forEach(child => {
       const data = child.val();
       if (data && typeof data.score === 'number') {
-        entries.push({ 
-          nickname: data.nickname || '???', 
-          score: data.score,
-          key: child.key 
-        });
+        entries.push({ nickname: data.nickname || '???', score: data.score, key: child.key });
       }
     });
-    
-    // Сортируем по убыванию (limitToLast даёт последние 100 по возрастанию, поэтому переворачиваем)
     entries.sort((a, b) => b.score - a.score);
-    
+    leaderboardData = entries;
     let html = '';
-    entries.forEach((entry, index) => {
-      html += `<div class="leaderboard-row"><span>${index+1}. ${escapeHtml(entry.nickname)}</span><span>${entry.score}</span></div>`;
+    let myRank = null;
+    entries.forEach((entry, idx) => {
+      const rank = idx+1;
+      const isMe = (entry.nickname === playerNickname);
+      if (isMe) myRank = rank;
+      html += `<div class="leaderboard-row ${isMe ? 'highlight' : ''}"><span>${rank}. ${escapeHtml(entry.nickname)}</span><span>${entry.score}</span></div>`;
     });
-    
-    if (entries.length === 0) {
-      html = '<div class="leaderboard-row">🏁 Пока нет рекордов</div>';
-    }
-    
+    if (entries.length === 0) html = '<div class="leaderboard-row">🏁 Пока нет рекордов</div>';
     leaderboardBody.innerHTML = html;
-    console.log(`📋 Таблица обновлена, записей: ${entries.length}`);
+    if (myRank) myRankInfo.innerText = `🏆 Ваше место: ${myRank} из ${entries.length}`;
+    else myRankInfo.innerText = playerNickname ? `📊 Ваш рекорд не в топ-100` : '';
   }, (error) => {
-    console.error('Ошибка загрузки таблицы:', error);
+    console.error(error);
     leaderboardBody.innerHTML = '<div class="leaderboard-row">⚠️ Ошибка загрузки</div>';
   });
 
-  // Простая защита от XSS
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -379,7 +446,130 @@
     });
   }
 
-  // ---------- ИГРА ----------
+  // ---------- ЗВУКИ И МУЗЫКА (Web Audio API) ----------
+  let audioCtx = null;
+  let soundEnabled = localStorage.getItem('laneRunnerSound') !== 'false';
+  let musicLoopNodes = [];
+  let musicGain = null;
+  let isMusicPlaying = false;
+
+  const soundToggleBtn = document.getElementById('soundToggleBtn');
+  soundToggleBtn.textContent = soundEnabled ? "🔊 Звук вкл" : "🔇 Звук выкл";
+
+  function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = soundEnabled ? 0.25 : 0;
+    musicGain.connect(audioCtx.destination);
+  }
+
+  function startBackgroundMusic() {
+    if (!audioCtx || !soundEnabled || isMusicPlaying) return;
+    isMusicPlaying = true;
+    const now = audioCtx.currentTime;
+    const notes = [523.25, 587.33, 659.25, 523.25];
+    let time = now + 0.2;
+    const interval = 0.35;
+    const loopLength = notes.length * interval;
+    function scheduleNote(t) {
+      for (let i = 0; i < notes.length; i++) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = notes[i];
+        gain.gain.value = 0.12;
+        osc.connect(gain);
+        gain.connect(musicGain);
+        const startTime = t + i * interval;
+        osc.start(startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.25);
+        osc.stop(startTime + 0.28);
+        musicLoopNodes.push(osc, gain);
+      }
+    }
+    scheduleNote(time);
+    function loop() {
+      if (!soundEnabled || !isMusicPlaying) return;
+      time += loopLength;
+      if (time < audioCtx.currentTime + 5) time = audioCtx.currentTime + 0.2;
+      scheduleNote(time);
+      setTimeout(loop, loopLength * 1000);
+    }
+    setTimeout(loop, loopLength * 1000);
+  }
+
+  function stopBackgroundMusic() {
+    isMusicPlaying = false;
+    for (let node of musicLoopNodes) {
+      try { node.stop && node.stop(); } catch(e) {}
+    }
+    musicLoopNodes = [];
+  }
+
+  function playJumpSound() {
+    if (!soundEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.2;
+    osc.type = 'sine';
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
+    osc.stop(audioCtx.currentTime + 0.2);
+  }
+
+  function playScoreSound() {
+    if (!soundEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 660;
+    gain.gain.value = 0.15;
+    osc.type = 'triangle';
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+    osc.stop(audioCtx.currentTime + 0.15);
+  }
+
+  function playCrashSound() {
+    if (!soundEnabled || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = 220;
+    gain.gain.value = 0.3;
+    osc.type = 'sawtooth';
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+    osc.stop(audioCtx.currentTime + 0.3);
+  }
+
+  function toggleSound() {
+    soundEnabled = !soundEnabled;
+    localStorage.setItem('laneRunnerSound', soundEnabled);
+    soundToggleBtn.textContent = soundEnabled ? "🔊 Звук вкл" : "🔇 Звук выкл";
+    if (audioCtx) {
+      if (musicGain) musicGain.gain.value = soundEnabled ? 0.25 : 0;
+      if (soundEnabled && !isMusicPlaying && gameActive) startBackgroundMusic();
+      if (!soundEnabled && isMusicPlaying) stopBackgroundMusic();
+    }
+  }
+  soundToggleBtn.addEventListener('click', () => toggleSound());
+
+  function enableAudioOnUserGesture() {
+    if (audioCtx && audioCtx.state === 'running') return;
+    initAudio();
+    audioCtx.resume().then(() => {
+      if (soundEnabled && !isMusicPlaying && gameActive) startBackgroundMusic();
+    }).catch(e=>console.log);
+  }
+
+  // ---------- ИГРОВАЯ ЛОГИКА ----------
   const LANE_COUNT = 3;
   const PLAYER_SIZE = 36;
   const OBSTACLE_SIZE = 40;
@@ -391,72 +581,82 @@
   const scoreSpan = document.getElementById('scoreDisplay');
   const bestSpan = document.getElementById('bestDisplay');
   
-  let player = { lane: 1 };
+  let player = { lane: 1, yOffset: 0 };
   let obstacles = [];
   let score = 0;
   let bestScore = 0;
   let gameActive = false;
   let frameRequest;
   let speed = BASE_SPEED;
+  let particles = [];
+  let floatTexts = [];
+  let cameraShake = 0;
+  let shakeTimeout = null;
   
-  try {
-    const saved = localStorage.getItem('laneRunner_best');
-    if (saved) bestScore = parseInt(saved, 10) || 0;
-  } catch(e) {}
+  try { const saved = localStorage.getItem('laneRunner_best'); if (saved) bestScore = parseInt(saved,10)||0; } catch(e) {}
   bestSpan.textContent = bestScore;
+  
+  function startShake(intensity) {
+    if (shakeTimeout) clearTimeout(shakeTimeout);
+    cameraShake = intensity;
+    shakeTimeout = setTimeout(() => {
+      cameraShake = 0;
+      shakeTimeout = null;
+    }, 500);
+  }
   
   function updateScoreUI() {
     scoreSpan.textContent = score;
     if (score > bestScore) {
       bestScore = score;
       bestSpan.textContent = bestScore;
-      try { localStorage.setItem('laneRunner_best', bestScore); } catch(e) {}
+      localStorage.setItem('laneRunner_best', bestScore);
     }
   }
   
   async function submitScore() {
-    if (!playerNickname) return;
+    if (!playerNickname || score === 0) return;
     try {
-      // Используем безопасный ключ (ник может содержать спецсимволы)
       const safeKey = encodeURIComponent(playerNickname);
       const playerRef = ref(db, `${LEADERBOARD_PATH}/${safeKey}`);
-      
       const snapshot = await get(playerRef);
       const currentData = snapshot.val();
-      
       if (!currentData || score > currentData.score) {
-        await set(playerRef, {
-          nickname: playerNickname,
-          score: score,
-          timestamp: Date.now()
-        });
-        console.log(`📤 Рекорд ${!currentData ? 'добавлен' : 'обновлён'}: ${playerNickname} → ${score}`);
-      } else {
-        console.log(`ℹ️ Результат не улучшен (${score} ≤ ${currentData.score})`);
+        await set(playerRef, { nickname: playerNickname, score: score, timestamp: Date.now() });
+        console.log(`🏅 Рекорд обновлён: ${playerNickname} → ${score}`);
       }
-    } catch(e) {
-      console.error('Ошибка отправки:', e);
-    }
+    } catch(e) { console.error(e); }
   }
   
   function spawnObstacle() {
-    obstacles.push({
-      lane: Math.floor(Math.random() * LANE_COUNT),
-      y: -OBSTACLE_SIZE,
-      w: OBSTACLE_SIZE,
-      h: OBSTACLE_SIZE
-    });
+    obstacles.push({ lane: Math.floor(Math.random() * LANE_COUNT), y: -OBSTACLE_SIZE, w: OBSTACLE_SIZE, h: OBSTACLE_SIZE });
+  }
+  
+  function addParticles(x, y) {
+    for (let i=0; i<12; i++) {
+      particles.push({ x: x+Math.random()*30, y: y+Math.random()*30, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6-2, life: 0.6 });
+    }
+  }
+  
+  function addFloatScore(value, x, y) {
+    floatTexts.push({ text: `+${value}`, x: x, y: y, life: 1 });
   }
   
   function resetGame() {
     if (!gameAllowed) return;
+    enableAudioOnUserGesture();
     player.lane = 1;
     obstacles = [];
     score = 0;
     speed = BASE_SPEED;
+    particles = [];
+    floatTexts = [];
     gameActive = true;
+    if (shakeTimeout) clearTimeout(shakeTimeout);
+    cameraShake = 0;
     updateScoreUI();
     spawnObstacle();
+    if (soundEnabled && audioCtx && !isMusicPlaying) startBackgroundMusic();
     if (frameRequest) cancelAnimationFrame(frameRequest);
     frameRequest = requestAnimationFrame(gameLoop);
   }
@@ -464,18 +664,35 @@
   function jump() {
     if (!gameAllowed) return;
     if (!gameActive) { resetGame(); return; }
+    if (soundEnabled) playJumpSound();
     player.lane = (player.lane + 1) % LANE_COUNT;
+    player.yOffset = -8;
+    setTimeout(() => { player.yOffset = 0; }, 100);
   }
   
   function gameLoop() {
     if (!gameActive) { draw(); frameRequest = requestAnimationFrame(gameLoop); return; }
     
-    for (let obs of obstacles) obs.y += speed;
+    for (let i=0; i<particles.length; i++) {
+      particles[i].x += particles[i].vx;
+      particles[i].y += particles[i].vy;
+      particles[i].life -= 0.02;
+      particles[i].vy += 0.2;
+      if (particles[i].life <= 0) particles.splice(i--,1);
+    }
+    for (let i=0; i<floatTexts.length; i++) {
+      floatTexts[i].life -= 0.02;
+      floatTexts[i].y -= 1.2;
+      if (floatTexts[i].life <= 0) floatTexts.splice(i--,1);
+    }
     
+    for (let obs of obstacles) obs.y += speed;
     obstacles = obstacles.filter(obs => {
       if (obs.y > canvas.height + 100) {
         score++;
         updateScoreUI();
+        if (soundEnabled) playScoreSound();
+        addFloatScore(1, canvas.width-60, 40);
         speed = Math.min(MAX_SPEED, BASE_SPEED + Math.floor(score / 7) * 1.2);
         return false;
       }
@@ -486,7 +703,7 @@
     
     const laneW = canvas.width / LANE_COUNT;
     const px = player.lane * laneW + (laneW - PLAYER_SIZE)/2;
-    const py = 440;
+    const py = 440 + player.yOffset;
     const prect = { x: px, y: py - PLAYER_SIZE/2, w: PLAYER_SIZE, h: PLAYER_SIZE };
     
     for (let obs of obstacles) {
@@ -494,6 +711,10 @@
       if (prect.x < ox + obs.w && prect.x + prect.w > ox &&
           prect.y < obs.y + obs.h && prect.y + prect.h > obs.y) {
         gameActive = false;
+        if (soundEnabled) playCrashSound();
+        addParticles(px+PLAYER_SIZE/2, py);
+        startShake(8);
+        stopBackgroundMusic();
         if (playerNickname) submitScore();
         break;
       }
@@ -503,11 +724,13 @@
   }
   
   function draw() {
+    ctx.save();
+    if (cameraShake > 0) {
+      ctx.translate((Math.random()-0.5)*cameraShake, (Math.random()-0.5)*cameraShake*0.6);
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     ctx.fillStyle = '#12161c';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
     ctx.strokeStyle = '#3e4555';
     ctx.lineWidth = 2;
     for (let i=1; i<LANE_COUNT; i++) {
@@ -517,61 +740,66 @@
       ctx.lineTo(x, canvas.height);
       ctx.stroke();
     }
-    
     const laneW = canvas.width / LANE_COUNT;
-    ctx.shadowColor = '#00000040';
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 6;
     for (let obs of obstacles) {
       const x = obs.lane * laneW + (laneW - obs.w)/2;
       ctx.fillStyle = '#e04e5f';
       ctx.fillRect(x, obs.y, obs.w, obs.h);
       ctx.fillStyle = '#f07a89';
-      ctx.fillRect(x+3, obs.y+3, obs.w/3, obs.h/5);
+      ctx.fillRect(x+4, obs.y+4, obs.w/3, obs.h/5);
     }
-    
     const px = player.lane * laneW + (laneW - PLAYER_SIZE)/2;
-    const py = 440;
-    ctx.shadowBlur = 10;
+    const py = 440 + player.yOffset;
     ctx.fillStyle = '#5a9cff';
+    ctx.shadowBlur = 8;
     ctx.fillRect(px, py - PLAYER_SIZE/2, PLAYER_SIZE, PLAYER_SIZE);
     ctx.fillStyle = '#a0c4ff';
-    ctx.fillRect(px+5, py - PLAYER_SIZE/2+5, PLAYER_SIZE/3, PLAYER_SIZE/5);
+    ctx.fillRect(px+6, py - PLAYER_SIZE/2+6, PLAYER_SIZE/3, PLAYER_SIZE/5);
+    for (let p of particles) {
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = '#ffaa66';
+      ctx.fillRect(p.x, p.y, 4, 4);
+    }
+    ctx.globalAlpha = 1;
+    for (let t of floatTexts) {
+      ctx.font = 'bold 20px Inter';
+      ctx.fillStyle = `rgba(255, 220, 100, ${t.life})`;
+      ctx.fillText(t.text, t.x, t.y);
+    }
     ctx.shadowBlur = 0;
-    
     if (!gameActive) {
       ctx.font = 'bold 24px Inter, sans-serif';
       ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = '#00000080';
-      ctx.shadowBlur = 12;
+      ctx.shadowBlur = 10;
       ctx.textAlign = 'center';
       ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2-15);
-      ctx.font = '16px Inter, sans-serif';
+      ctx.font = '16px Inter';
       ctx.fillText('Нажми СТАРТ', canvas.width/2, canvas.height/2+20);
-      ctx.shadowBlur = 0;
     }
-    
     ctx.font = 'bold 22px monospace';
     ctx.fillStyle = '#ffffff';
-    ctx.shadowBlur = 8;
-    ctx.fillText(`${score}`, canvas.width-60, 45);
-    ctx.shadowBlur = 0;
+    ctx.fillText(`${score}`, canvas.width-50, 45);
+    ctx.textAlign = 'left';
+    ctx.restore();
   }
   
+  // Управление
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' && gameAllowed) {
       e.preventDefault();
       jump();
+      enableAudioOnUserGesture();
     }
   });
-  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(gameAllowed) jump(); }, { passive: false });
-  canvas.addEventListener('mousedown', (e) => { e.preventDefault(); if(gameAllowed) jump(); });
-  document.getElementById('restartBtn').addEventListener('click', resetGame);
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(gameAllowed) { jump(); enableAudioOnUserGesture(); } }, { passive: false });
+  canvas.addEventListener('mousedown', (e) => { e.preventDefault(); if(gameAllowed) { jump(); enableAudioOnUserGesture(); } });
+  document.getElementById('restartBtn').addEventListener('click', () => { resetGame(); enableAudioOnUserGesture(); });
   
   function idleDraw() { draw(); requestAnimationFrame(idleDraw); }
   idleDraw();
   
-  console.log('🏃 LANE RUNNER — игра готова. Введите ник и нажмите СТАРТ');
-  console.log(`📁 Данные сохраняются в Firebase: ${LEADERBOARD_PATH}`);
+  console.log('🏃 LANE RUNNER — с возможностью редактирования ника');
 </script>
 </body>
 </html>
