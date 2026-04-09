@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>NEON DASH · Мировой рейтинг</title>
+  <title>🏃 LANE RUNNER · Мировой рейтинг</title>
+  <!-- Фавикон в стиле раннера (бегун + дорожки) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23252a34'/%3E%3Cpath d='M26 24 L36 24 L34 30 L28 30 Z' fill='%23e4e6eb'/%3E%3Crect x='18' y='34' width='28' height='4' fill='%235a9cff'/%3E%3Crect x='22' y='42' width='20' height='4' fill='%23e04e5f'/%3E%3Ccircle cx='46' cy='40' r='5' fill='%23f5b042'/%3E%3C/svg%3E">
   <style>
     * {
       margin: 0;
@@ -233,7 +235,7 @@
 
 <div class="modal" id="nicknameModal">
   <div class="modal-content">
-    <h2>Введите ваш ник</h2>
+    <h2>🏃 Введите ваш ник</h2>
     <input type="text" id="nicknameInput" maxlength="16" placeholder="Ваше имя">
     <br>
     <button id="saveNicknameBtn">Сохранить</button>
@@ -255,12 +257,12 @@
       <button class="btn" id="restartBtn">▶ СТАРТ</button>
     </div>
     <div class="hint">
-      ПРОБЕЛ или ТАП — прыжок
+      🚀 ПРОБЕЛ или ТАП — прыжок между линиями
     </div>
   </div>
 
   <div class="leaderboard-panel">
-    <h2>ТОП-100</h2>
+    <h2>🏅 ТОП-100 раннеров</h2>
     <div class="leaderboard-scroll">
       <div class="leaderboard-row header"><span>Игрок</span><span>Счёт</span></div>
       <div id="leaderboardBody">Загрузка...</div>
@@ -270,7 +272,7 @@
 
 <script type="module">
   import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-  import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+  import { getDatabase, ref, onValue, set, get, query, orderByChild, limitToLast } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
   import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 
   const firebaseConfig = {
@@ -288,10 +290,12 @@
   const auth = getAuth(app);
   signInAnonymously(auth).catch(e => console.warn('Auth:', e));
 
-  const leaderboardRef = ref(db, 'leaderboard');
+  // ИСПРАВЛЕНО: используем отдельную ветку lane_runner_leaderboard (согласно правилам)
+  const LEADERBOARD_PATH = 'lane_runner_leaderboard';
+  const leaderboardRef = ref(db, LEADERBOARD_PATH);
 
   // ---------- НИКНЕЙМ ----------
-  let playerNickname = localStorage.getItem('neonDashNickname');
+  let playerNickname = localStorage.getItem('laneRunnerNickname');
   const nicknameSpan = document.querySelector('#nicknameDisplay span');
   const modal = document.getElementById('nicknameModal');
   const input = document.getElementById('nicknameInput');
@@ -299,8 +303,8 @@
   let gameAllowed = false;
 
   function generateRandomNick() {
-    const adj = ['Swift', 'Silent', 'Quick', 'Sharp', 'Bold', 'Calm', 'Brave', 'Noble'];
-    const noun = ['Fox', 'Hawk', 'Wolf', 'Lynx', 'Falcon', 'Cobra', 'Otter', 'Puma'];
+    const adj = ['Swift', 'Quick', 'Sharp', 'Bold', 'Calm', 'Brave', 'Fast', 'Lucky', 'Steel', 'Wild'];
+    const noun = ['Fox', 'Hawk', 'Wolf', 'Lynx', 'Falcon', 'Runner', 'Dash', 'Puma', 'Tiger', 'Eagle'];
     const a = adj[Math.floor(Math.random() * adj.length)];
     const n = noun[Math.floor(Math.random() * noun.length)];
     return `${a}_${n}${Math.floor(Math.random()*100)}`;
@@ -308,7 +312,7 @@
 
   function saveNickname(name) {
     playerNickname = name || generateRandomNick();
-    localStorage.setItem('neonDashNickname', playerNickname);
+    localStorage.setItem('laneRunnerNickname', playerNickname);
     nicknameSpan.textContent = playerNickname;
     modal.classList.remove('active');
     gameAllowed = true;
@@ -326,37 +330,54 @@
   document.getElementById('randomNicknameBtn').addEventListener('click', () => saveNickname(generateRandomNick()));
   input.addEventListener('keypress', (e) => { if(e.key==='Enter') saveNickname(input.value.trim()); });
 
-  // ---------- ТАБЛИЦА ЛИДЕРОВ (все записи, сортировка по убыванию) ----------
+  // ---------- ТАБЛИЦА ЛИДЕРОВ (сортировка по score, топ-100) ----------
   const leaderboardBody = document.getElementById('leaderboardBody');
+  
+  // Оптимизированный запрос с использованием индекса score (согласно правилам)
+  const topScoresQuery = query(leaderboardRef, orderByChild('score'), limitToLast(100));
 
-  // Используем onValue для получения всех записей без limitToLast, чтобы избежать проблем с сортировкой
-  onValue(leaderboardRef, (snapshot) => {
+  onValue(topScoresQuery, (snapshot) => {
     const entries = [];
     snapshot.forEach(child => {
       const data = child.val();
       if (data && typeof data.score === 'number') {
-        entries.push({ nickname: data.nickname || '???', score: data.score });
+        entries.push({ 
+          nickname: data.nickname || '???', 
+          score: data.score,
+          key: child.key 
+        });
       }
     });
     
-    // Сортируем по убыванию счёта
+    // Сортируем по убыванию (limitToLast даёт последние 100 по возрастанию, поэтому переворачиваем)
     entries.sort((a, b) => b.score - a.score);
     
-    // Берём топ-100
-    const top100 = entries.slice(0, 100);
-    
     let html = '';
-    top100.forEach((entry, index) => {
-      html += `<div class="leaderboard-row"><span>${index+1}. ${entry.nickname}</span><span>${entry.score}</span></div>`;
+    entries.forEach((entry, index) => {
+      html += `<div class="leaderboard-row"><span>${index+1}. ${escapeHtml(entry.nickname)}</span><span>${entry.score}</span></div>`;
     });
     
-    if (top100.length === 0) {
-      html = '<div class="leaderboard-row">Пока нет рекордов</div>';
+    if (entries.length === 0) {
+      html = '<div class="leaderboard-row">🏁 Пока нет рекордов</div>';
     }
     
     leaderboardBody.innerHTML = html;
     console.log(`📋 Таблица обновлена, записей: ${entries.length}`);
+  }, (error) => {
+    console.error('Ошибка загрузки таблицы:', error);
+    leaderboardBody.innerHTML = '<div class="leaderboard-row">⚠️ Ошибка загрузки</div>';
   });
+
+  // Простая защита от XSS
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
 
   // ---------- ИГРА ----------
   const LANE_COUNT = 3;
@@ -379,7 +400,7 @@
   let speed = BASE_SPEED;
   
   try {
-    const saved = localStorage.getItem('neonDash_best');
+    const saved = localStorage.getItem('laneRunner_best');
     if (saved) bestScore = parseInt(saved, 10) || 0;
   } catch(e) {}
   bestSpan.textContent = bestScore;
@@ -389,15 +410,16 @@
     if (score > bestScore) {
       bestScore = score;
       bestSpan.textContent = bestScore;
-      try { localStorage.setItem('neonDash_best', bestScore); } catch(e) {}
+      try { localStorage.setItem('laneRunner_best', bestScore); } catch(e) {}
     }
   }
   
   async function submitScore() {
     if (!playerNickname) return;
     try {
+      // Используем безопасный ключ (ник может содержать спецсимволы)
       const safeKey = encodeURIComponent(playerNickname);
-      const playerRef = ref(db, `leaderboard/${safeKey}`);
+      const playerRef = ref(db, `${LEADERBOARD_PATH}/${safeKey}`);
       
       const snapshot = await get(playerRef);
       const currentData = snapshot.val();
@@ -548,7 +570,8 @@
   function idleDraw() { draw(); requestAnimationFrame(idleDraw); }
   idleDraw();
   
-  console.log('🚀 Игра готова. Введите ник и нажмите СТАРТ');
+  console.log('🏃 LANE RUNNER — игра готова. Введите ник и нажмите СТАРТ');
+  console.log(`📁 Данные сохраняются в Firebase: ${LEADERBOARD_PATH}`);
 </script>
 </body>
 </html>
